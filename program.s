@@ -27,8 +27,7 @@ reloop:
     LDR r0, =0x04000000 // Base address of the framebuffer
     MOV r1, #Width              // Set resolution width
     MOV r2, #Height              // Set resolution height
-    LDR r10, =rbat_pos @ Load the address of the value in memory into R10
-    LDRH r6, [r10]  @ Load the value from memory (at address R10) into R6
+
 
 game_loop:
     ADD r8, #1
