@@ -32,8 +32,15 @@ reloop:
 
 game_loop:
     ADD r8, #1
+    // This is where you run your game logic
 
+    // BL rbat_down (This would make the rbat move down every timestep)
+
+    // E7na fel 7a2ee2a hyb2a hena logic el kora bas, bas 3shan wenta btgarab mafeesh taree2a tet7akem fel madrab fa ht3mel call le rbat_down w tebos fel simulation tl2eeh bynzel ta7t fa 5alas hyb2a fadel enak twasalo bel interrupt bas ba3den.
+
+    // Draw new frame
     BL draw 
+    // Repeat
     B game_loop 
 
 
