@@ -3,7 +3,7 @@
 # Start QEMU in the background
 echo "[+] Starting QEMU..."
 
-qemu-system-arm -M versatilepb -nographic -S -gdb tcp::1234 -kernel program.elf &
+qemu-system-arm -M versatilepb -nographic -S -gdb tcp::1234 -kernel program &
 
 # Store QEMU PID in case you want to stop it later
 QEMU_PID=$!

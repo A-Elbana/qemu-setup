@@ -27,21 +27,21 @@ reloop:
     LDR r0, =0x04000000 // Base address of the framebuffer
     MOV r1, #Width              // Set resolution width
     MOV r2, #Height              // Set resolution height
-
+    MOV r11, #1 // State bit for the up and down movement (Ideally should be a memory variable)
 
 game_loop:
     ADD r8, #1
     // This is where you run your game logic
+    CMP r11, #1
+    BEQ increment
+    B decrement
 
-    // BL rbat_down (This would make the rbat move down every timestep)
 
-    // E7na fel 7a2ee2a hyb2a hena logic el kora bas, bas 3shan wenta btgarab mafeesh taree2a tet7akem fel madrab fa ht3mel call le rbat_down w tebos fel simulation tl2eeh bynzel ta7t fa 5alas hyb2a fadel enak twasalo bel interrupt bas ba3den.
-
+draw_frame:
     // Draw new frame
     BL draw 
     // Repeat
     B game_loop 
-
 
 done:
     // Exit
@@ -49,6 +49,33 @@ done:
 
 hang:
     B hang
+
+
+@ ----------------------------------------
+@ A sequence of functions to move the r_bat down and up
+increment:
+    LDR r10, =rbat_pos // Load the address of the right bat position
+    LDRH r6, [r10] // Load the current position of the right bat
+    ADDS r6, r6, #3 // Move down by 3 pixels
+    SUBS r9, r2, #50 // Move down by 3 pixels
+    CMP r6, r9       // Check max height
+    BGE switch // Return if out-of-bounds
+    STRH r6, [r10] // Store the new position back to memory
+    B draw_frame
+switch:
+    EOR r11, #1 // Toggle the switch
+    B draw_frame
+decrement:
+    LDR r10, =rbat_pos // Load the address of the right bat position
+    LDRH r6, [r10] // Load the current position of the right bat
+    ADDS r6, r6, #-3 // Move down by 3 pixels
+    CMP r6, #50       // Check max height (50 is the height of the bat divided by two)
+    BLE switch // Return if out-of-bounds
+    STRH r6, [r10] // Store the new position back to memory
+    B draw_frame
+
+
+
 
 
 @ ----------------------------------------
@@ -61,7 +88,8 @@ rbat_down:
     LDR r10, =rbat_pos // Load the address of the right bat position
     LDRH r6, [r10] // Load the current position of the right bat
     ADDS r6, r6, #3 // Move down by 3 pixels
-    CMP r6, r2      // Check max height
+    SUBS r9, r2, #50  // Check max height (50 is the height of the bat divided by two)
+    CMP r6, r9       // Check max height 
     BGE rbat_down_return // Return if out-of-bounds
     STRH r6, [r10] // Store the new position back to memory
 rbat_down_return:
@@ -80,8 +108,8 @@ rbat_up:
     LDR r10, =rbat_pos // Load the address of the right bat position
     LDRH r6, [r10] // Load the current position of the right bat
     SUB r6, r6, #3 // Move up by 3 pixels
-    CMP r6, 0      // Check min height
-    BGE rbat_up_return // Return if out-of-bounds
+    CMP r6, #50      // Check min height
+    BLE rbat_up_return // Return if out-of-bounds
     STRH r6, [r10] // Store the new position back to memory
 rbat_up_return:
     POP {r3-r12, lr}
@@ -123,8 +151,11 @@ draw_bg:
 @   No inputs. This reads memory values.
 draw:
     PUSH {r3-r12, lr}
-    // Draw left bat
+
+    LDR r0, =0x04000000 // Base address of the framebuffer
     BL background
+    
+    // Draw left bat
     MOV r6, #20 // X-Coordinate (Constant for bats)
     LDR r10, =lbat_pos // Y-Coordinate
     LDRH r7, [r10]
